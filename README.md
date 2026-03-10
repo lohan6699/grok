@@ -1,103 +1,211 @@
-<!DOCTYPE html>
+><!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Olá Mundo - Terra Girando NASA</title>
-  
+  <title>Jogo da Memória - Simples</title>
   <style>
     body {
       margin: 0;
       height: 100vh;
-      background: radial-gradient(circle at center, #0a001f 0%, #000814 100%);
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      font-family: Arial, Helvetica, sans-serif;
-      overflow: hidden;
+      justify-content: center;
+      color: white;
     }
 
-    .container {
+    h1 {
+      margin: 20px 0;
+      text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    }
+
+    #info {
+      margin: 10px;
+      font-size: 1.2rem;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 90px);
+      grid-gap: 15px;
+      perspective: 1000px;
+    }
+
+    .card {
+      width: 90px;
+      height: 120px;
       position: relative;
-      width: min(80vmin, 420px);
-      height: min(80vmin, 420px);
-      text-align: center;
-    }
-
-    .earth-link {
-      display: block;
-      width: 100%;
-      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
       cursor: pointer;
-      transition: transform 0.3s ease;
     }
 
-    .earth-link:hover {
-      transform: scale(1.05); /* leve zoom ao hover pra dar feedback */
+    .card.flipped {
+      transform: rotateY(180deg);
     }
 
-    .earth {
+    .card-front, .card-back {
+      position: absolute;
       width: 100%;
       height: 100%;
-      border-radius: 50%;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/7/7f/Rotating_earth_animated_transparent.gif') center/cover no-repeat;
-      box-shadow: 
-        0 0 80px rgba(80, 160, 255, 0.8),
-        inset 0 0 100px rgba(0, 0, 0, 0.7);
+      backface-visibility: hidden;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
     }
 
-    .text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #00ffff;
-      font-size: clamp(2.8rem, 9vw, 5rem);
-      font-weight: 900;
-      letter-spacing: 5px;
-      text-shadow: 
-        0 0 10px #00ffff,
-        0 0 30px #00ffff,
-        0 0 60px #0099ff,
-        0 0 100px #0044cc;
-      pointer-events: none; /* texto não interfere no clique */
-      z-index: 10;
-      white-space: nowrap;
-      animation: pulse 5s ease-in-out infinite alternate;
+    .card-front {
+      background: #f39c12;
+      color: white;
+      transform: rotateY(180deg);
     }
 
-    @keyframes pulse {
-      from { opacity: 0.8; filter: brightness(1); }
-      to   { opacity: 1; filter: brightness(1.3); }
+    .card-back {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: #ecf0f1;
     }
 
-    /* Player invisível do YouTube */
-    .audio-player {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-      width: 1px;
-      height: 1px;
+    .card.matched .card-front {
+      background: #27ae60;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #c0392b;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <a href="https://www.nasa.gov/" target="_blank" class="earth-link">
-      <div class="earth"></div>
-    </a>
-    <div class="text">Olá Mundo</div>
-  </div>
+  <h1>Jogo da Memória</h1>
+  <div id="info">Movimentos: 0 | Tempo: 0s</div>
 
-  <!-- Embed do YouTube invisível com autoplay e loop (começando em ~30s) -->
-  <iframe 
-    class="audio-player"
-    src="https://www.youtube.com/embed/xS_E7WzPjvE?start=30&autoplay=1&loop=1&playlist=xS_E7WzPjvE&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1"
-    frameborder="0" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-    allowfullscreen>
-  </iframe>
+  <div id="game-board"></div>
+
+  <button id="restart">Jogar Novamente</button>
+
+  <script>
+    const emojis = ['🍎','🍌','🍇','🍉','🍓','🍒','🍍','🥝'];
+    let cards = [...emojis, ...emojis]; // 16 cartas (8 pares)
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let moves = 0;
+    let timer = 0;
+    let timerInterval;
+
+    const board = document.getElementById('game-board');
+    const info = document.getElementById('info');
+    const restartBtn = document.getElementById('restart');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function createCard(emoji) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+
+      const front = document.createElement('div');
+      front.classList.add('card-front');
+      front.textContent = emoji;
+
+      const back = document.createElement('div');
+      back.classList.add('card-back');
+      back.textContent = '?';
+
+      card.appendChild(front);
+      card.appendChild(back);
+
+      card.addEventListener('click', () => flipCard(card, emoji));
+
+      return card;
+    }
+
+    function startGame() {
+      board.innerHTML = '';
+      cards = shuffle(cards);
+      matchedPairs = 0;
+      moves = 0;
+      timer = 0;
+      flippedCards = [];
+      clearInterval(timerInterval);
+      updateInfo();
+
+      cards.forEach(emoji => {
+        const cardElem = createCard(emoji);
+        board.appendChild(cardElem);
+      });
+
+      timerInterval = setInterval(() => {
+        timer++;
+        updateInfo();
+      }, 1000);
+    }
+
+    function flipCard(card, emoji) {
+      if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+      card.classList.add('flipped');
+      flippedCards.push({card, emoji});
+
+      if (flippedCards.length === 2) {
+        moves++;
+        updateInfo();
+
+        setTimeout(checkMatch, 800);
+      }
+    }
+
+    function checkMatch() {
+      const [first, second] = flippedCards;
+
+      if (first.emoji === second.emoji) {
+        first.card.classList.add('matched');
+        second.card.classList.add('matched');
+        matchedPairs++;
+
+        if (matchedPairs === emojis.length) {
+          clearInterval(timerInterval);
+          setTimeout(() => alert(`Parabéns! Você venceu!\nMovimentos: ${moves}\nTempo: ${timer}s`), 500);
+        }
+      } else {
+        first.card.classList.remove('flipped');
+        second.card.classList.remove('flipped');
+      }
+
+      flippedCards = [];
+    }
+
+    function updateInfo() {
+      info.textContent = `Movimentos: ${moves} | Tempo: ${timer}s`;
+    }
+
+    restartBtn.addEventListener('click', startGame);
+
+    // Inicia o jogo na primeira vez
+    startGame();
+  </script>
 
 </body>
 </html>
