@@ -1,175 +1,137 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Squirtle CSS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro de Clientes</title>
+  
   <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      height: 100vh;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #a1d4ff;
-      background: linear-gradient(to bottom, #a1d4ff 0%, #6ab7f5 100%);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #1f2937;
     }
-
-    .squirtle {
-      position: relative;
-      width: 220px;
-      height: 260px;
-    }
-
-    /* Cabeça */
-    .head {
-      width: 160px;
-      height: 140px;
-      background: #4a90e2;
-      border-radius: 50% 50% 40% 40%;
-      position: absolute;
-      top: 20px;
-      left: 30px;
-      border: 5px solid #2c5aa0;
-      box-shadow: inset 0 10px 20px #6ab7f5;
-    }
-
-    /* Barriga / corpo */
-    .body {
-      width: 180px;
-      height: 140px;
-      background: #4a90e2;
-      border-radius: 50%;
-      position: absolute;
-      bottom: 0;
-      left: 20px;
-      border: 5px solid #2c5aa0;
-      box-shadow: inset 0 -10px 30px #6ab7f5;
-    }
-
-    /* Rabo */
-    .tail {
-      width: 90px;
-      height: 90px;
-      background: #4a90e2;
-      border-radius: 50% 50% 50% 0;
-      position: absolute;
-      bottom: 30px;
-      left: -30px;
-      border: 5px solid #2c5aa0;
-      border-right: none;
-      border-bottom: none;
-      transform: rotate(-35deg);
-    }
-
-    .tail::before {
-      content: "";
-      width: 60px;
-      height: 60px;
-      background: #4a90e2;
-      border: 5px solid #2c5aa0;
-      border-radius: 50%;
-      position: absolute;
-      bottom: -15px;
-      right: -10px;
-      transform: rotate(60deg);
-    }
-
-    /* Olhos */
-    .eye {
-      width: 42px;
-      height: 50px;
+    .container {
       background: white;
-      border-radius: 50%;
-      position: absolute;
-      top: 50px;
-      border: 4px solid #2c5aa0;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+      overflow: hidden;
     }
-    .eye.left  { left: 45px; }
-    .eye.right { right: 45px; }
+    .tabs {
+      display: flex;
+      background: #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .tab {
+      flex: 1;
+      padding: 16px;
+      text-align: center;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #4b5563;
+    }
+    .tab.active {
+      background: white;
+      color: #4f46e5;
+      border-bottom: 3px solid #4f46e5;
+    }
+    .tab-content {
+      padding: 28px;
+      min-height: 420px;
+    }
+    .tab-content.hidden { display: none; }
 
-    .pupil {
-      width: 22px;
-      height: 26px;
-      background: #2c5aa0;
-      border-radius: 50%;
-      position: absolute;
-      top: 12px;
-      left: 10px;
+    /* Form styles */
+    .form-group { margin-bottom: 24px; }
+    label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.95rem; color: #374151; }
+    input, select {
+      width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 1rem; transition: all 0.2s;
     }
-    .pupil::after {
-      content: "";
-      width: 10px;
-      height: 10px;
-      background: black;
-      border-radius: 50%;
-      position: absolute;
-      top: 6px;
-      right: 4px;
+    input:focus, select:focus {
+      outline: none; border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
     }
+    .error { color: #dc2626; font-size: 0.84rem; margin-top: 6px; min-height: 1.2em; }
+    button {
+      width: 100%; padding: 16px; background: #4f46e5; color: white; border: none;
+      border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 16px;
+      transition: all 0.25s;
+    }
+    button:hover:not(:disabled) { background: #4338ca; transform: translateY(-2px); }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
 
-    /* Boca / expressão */
-    .mouth {
-      width: 60px;
-      height: 30px;
-      border-bottom: 5px solid #2c5aa0;
-      border-radius: 0 0 50% 50%;
-      position: absolute;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%);
+    .success-msg, .error-msg {
+      padding: 16px; margin: 20px 0; border-radius: 10px; text-align: center; font-weight: 500;
     }
+    .success-msg { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .error-msg   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
-    /* Casco (parte de cima) */
-    .shell-top {
-      width: 190px;
-      height: 110px;
-      background: #f4a460;
-      border: 5px solid #8b5a2b;
-      border-radius: 50% 50% 40% 40%;
-      position: absolute;
-      bottom: 60px;
-      left: 15px;
-    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 520px) { .row { grid-template-columns: 1fr; gap: 24px; } }
 
-    /* Detalhes do casco */
-    .shell-pattern {
-      position: absolute;
-      inset: 10px;
-      background: 
-        radial-gradient(circle at 30% 40%, #deb887 0%, #deb887 20%, transparent 21%),
-        radial-gradient(circle at 70% 35%, #deb887 0%, #deb887 18%, transparent 19%),
-        radial-gradient(circle at 50% 70%, #deb887 0%, #deb887 22%, transparent 23%);
-      border-radius: inherit;
+    /* Lista de clientes */
+    .client-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .client-list { display: flex; flex-direction: column; gap: 16px; }
+    .client-card {
+      background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      position: relative;
     }
-
-    .shell-bottom {
-      width: 170px;
-      height: 50px;
-      background: #cd853f;
-      border: 5px solid #8b5a2b;
-      border-radius: 50%;
-      position: absolute;
-      bottom: 10px;
-      left: 25px;
+    .client-card h3 { margin: 0 0 12px; color: #1f2937; font-size: 1.15rem; }
+    .client-info { font-size: 0.95rem; color: #4b5563; line-height: 1.6; }
+    .client-info strong { color: #374151; }
+    .delete-btn {
+      position: absolute; top: 16px; right: 16px;
+      background: #ef4444; color: white; border: none;
+      border-radius: 6px; padding: 6px 12px; font-size: 0.85rem;
+      cursor: pointer; transition: background 0.2s;
     }
+    .delete-btn:hover { background: #dc2626; }
+    .no-clients { text-align: center; color: #6b7280; padding: 80px 20px; font-size: 1.1rem; }
   </style>
 </head>
 <body>
 
-<div class="squirtle">
-  <div class="tail"></div>
-  <div class="body"></div>
-  <div class="shell-bottom"></div>
-  <div class="shell-top">
-    <div class="shell-pattern"></div>
-  </div>
-  <div class="head">
-    <div class="eye left"><div class="pupil"></div></div>
-    <div class="eye right"><div class="pupil"></div></div>
-    <div class="mouth"></div>
-  </div>
-</div>
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" data-tab="cadastro">Novo Cadastro</div>
+      <div class="tab" data-tab="lista">Clientes Cadastrados</div>
+    </div>
 
-</body>
-</html>
+    <div class="tab-content" id="cadastro">
+      <form id="cadastro-form" novalidate>
+        <!-- Campos do formulário (mantidos iguais à versão anterior) -->
+        <div class="form-group">
+          <label for="nome">Nome completo *</label>
+          <input type="text" id="nome" required minlength="3" placeholder="Ex: João Silva Santos">
+          <span class="error" id="erro-nome"></span>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label for="cpf">CPF *</label>
+            <input type="text" id="cpf" required placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
+            <span class="error" id="erro-cpf"></span>
+          </div>
+          <div class="form-group">
+            <label for="nascimento">Data de nascimento *</label>
+            <input type="date" id="nascimento" required>
+            <span class="error" id="erro-nascimento"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail *</label>
+          <input type="email" id="email" required placeholder="seuemail@exemplo.com">
+          <span class="error" id="erro-email"></span>
+        </div>
+
+        <div class="row">
+          <div class="
