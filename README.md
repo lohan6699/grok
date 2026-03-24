@@ -35,10 +35,8 @@
       border-radius: 50%;
       display: none;
       font-size: 40px;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      text-shadow: 0 0 10px black;
+      align-items: center; justify-content: center;
+      color: white; text-shadow: 0 0 10px black;
     }
     #score { position: absolute; top: 15px; left: 20px; color: white; font-size: 28px; font-weight: bold; text-shadow: 2px 2px 4px black; }
     #superBar { position: absolute; top: 55px; left: 20px; width: 220px; height: 20px; background: rgba(0,0,0,0.6); border: 3px solid #00ffff; border-radius: 10px; overflow: hidden; }
@@ -116,13 +114,9 @@
                a.y + a.size/2 < b.y || a.y - a.size/2 > b.y + b.h);
     }
 
-    function isInBush(entity) {
-      return bushes.some(b => rectCollide(entity, b));
-    }
-
     function spawnEnemy() {
-      let x = Math.random() * (canvas.width - 100) + 50;
-      let y = Math.random() * (canvas.height - 100) + 50;
+      const x = Math.random() * (canvas.width - 100) + 50;
+      const y = Math.random() * (canvas.height - 100) + 50;
       enemies.push({
         x: x < 200 ? -40 : canvas.width + 40,
         y: y,
@@ -211,7 +205,7 @@
       bushes.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
       ctx.globalAlpha = 1;
 
-      // Movimento jogador
+      // Movimento do jogador
       let dx = 0, dy = 0;
       if (keys['w'] || keys['arrowup']) dy -= 1;
       if (keys['s'] || keys['arrowdown']) dy += 1;
@@ -228,6 +222,245 @@
         const testX = {x: newX, y: player.y, size: player.size};
         const testY = {x: player.x, y: newY, size: player.size};
 
-               // Colisão com paredes (movimento X)
+        // Colisão com paredes
         walls.forEach(w => {
-          if (rect
+          if (rectCollide(testX, w)) canX = false;
+          if (rectCollide(testY, w)) canY = false;
+        });
+
+        if (canX) player.x = newX;
+        if (canY) player.y = newY;
+
+        // Manter dentro da tela
+        player.x = Math.max(player.size/2, Math.min(canvas.width - player.size/2, player.x));
+        player.y = Math.max(player.size/2, Math.min(canvas.height - player.size/2, player.y));
+      }
+
+      // Ângulo do jogador (aponta para o mouse)
+      const dxMouse = mouseX - player.x;
+      const dyMouse = mouseY - player.y;
+      player.angle = Math.atan2(dyMouse, dxMouse);
+
+      // Desenhar jogador
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(player.angle);
+      ctx.fillStyle = player.color;
+      ctx.beginPath();
+      ctx.arc(0, 0, player.size/2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.fillRect(10, -7, 20, 14); // arma
+      ctx.restore();
+
+      // Balas
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.life--;
+
+        ctx.fillStyle = b.color;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (b.isSuper) {
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.size + 5, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        if (b.life <= 0) { bullets.splice(i, 1); continue; }
+
+        let hitWall = false;
+        walls.forEach(w => { if (rectCollide(b, w)) hitWall = true; });
+        if (hitWall) { bullets.splice(i, 1); continue; }
+      }
+
+      // Inimigos
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        const edx = player.x - e.x;
+        const edy = player.y - e.y;
+        const dist = Math.hypot(edx, edy) || 1;
+        e.x += (edx / dist) * e.speed;
+        e.y += (edy / dist) * e.speed;
+
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size/2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // olhos
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(e.x-6, e.y-5, 5, 0, Math.PI*2);
+        ctx.arc(e.x+6, e.y-5, 5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(e.x-6 + (edx/dist)*3, e.y-5 + (edy/dist)*3, 2.5, 0, Math.PI*2);
+        ctx.arc(e.x+6 + (edx/dist)*3, e.y-5 + (edy/dist)*3, 2.5, 0, Math.PI*2);
+        ctx.fill();
+
+        // colisão com jogador
+        if (Math.hypot(player.x - e.x, player.y - e.y) < player.size/2 + e.size/2) {
+          player.health -= 1.2;
+          createExplosion(e.x, e.y, '#ff0000', 15);
+          enemies.splice(i, 1);
+          spawnEnemy();
+        }
+      }
+
+      // Colisão bala × inimigo
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        for (let j = enemies.length - 1; j >= 0; j--) {
+          const e = enemies[j];
+          if (Math.hypot(b.x - e.x, b.y - e.y) < b.size + e.size/2) {
+            e.health -= b.damage;
+            createExplosion(b.x, b.y, '#ffff88', 10);
+            bullets.splice(i, 1);
+
+            if (e.health <= 0) {
+              score += 10;
+              scoreDiv.textContent = `Score: ${score}`;
+              createExplosion(e.x, e.y, '#ff8800', 30);
+              enemies.splice(j, 1);
+              spawnEnemy();
+
+              superCharge = Math.min(100, superCharge + (b.isSuper ? 40 : 14));
+              if (superCharge >= 100 && !isSuperReady) {
+                isSuperReady = true;
+                superText.style.opacity = '1';
+              }
+              superFill.style.width = superCharge + '%';
+            }
+            break;
+          }
+        }
+      }
+
+      // Partículas
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        p.vx *= 0.95;
+        p.vy *= 0.95;
+
+        ctx.globalAlpha = p.life / 35;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x-3, p.y-3, 6, 6);
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+      ctx.globalAlpha = 1;
+
+      // Game Over
+      if (player.health <= 0) {
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ff4444';
+        ctx.font = 'bold 70px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 20);
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '30px Arial';
+        ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2 + 50);
+
+        ctx.font = '24px Arial';
+        ctx.fillText('Clique para voltar ao menu', canvas.width/2, canvas.height/2 + 100);
+        return;
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // ==================== CONTROLES ====================
+
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup',   e => keys[e.key.toLowerCase()] = false);
+
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('click', () => { if (player && player.health > 0) shoot(false); });
+
+    // Super com botão direito ou Espaço
+    canvas.addEventListener('contextmenu', e => { e.preventDefault(); if (isSuperReady) shoot(true); });
+    window.addEventListener('keydown', e => {
+      if (e.key === ' ' && isSuperReady) { e.preventDefault(); shoot(true); }
+    });
+
+    // Touch controls
+    const joystick = document.getElementById('joystick');
+    let touchID = null;
+
+    canvas.addEventListener('touchstart', e => {
+      for (let t of e.changedTouches) {
+        const rect = canvas.getBoundingClientRect();
+        const tx = t.clientX - rect.left;
+        const ty = t.clientY - rect.top;
+
+        if (tx < 250 && ty > 400) {
+          // Joystick
+          joystick.style.display = 'block';
+          joyCenterX = t.clientX;
+          joyCenterY = t.clientY;
+          joystick.style.left = (joyCenterX - 65) + 'px';
+          joystick.style.top  = (joyCenterY - 65) + 'px';
+          joystickActive = true;
+          touchID = t.identifier;
+        } else if (tx > canvas.width - 200 && ty > canvas.height - 200) {
+          // Fire
+          if (isSuperReady) shoot(true);
+          else shoot(false);
+        }
+      }
+    });
+
+    window.addEventListener('touchmove', e => {
+      if (!joystickActive) return;
+      for (let t of e.changedTouches) {
+        if (t.identifier === touchID) {
+          let dx = t.clientX - joyCenterX;
+          let dy = t.clientY - joyCenterY;
+          const dist = Math.hypot(dx, dy);
+          const max = 55;
+          if (dist > max) { dx = (dx/dist)*max; dy = (dy/dist)*max; }
+          joystickX = dx / max;
+          joystickY = dy / max;
+          joystick.style.transform = `translate(${dx}px, ${dy}px)`;
+        }
+      }
+    });
+
+    window.addEventListener('touchend', e => {
+      for (let t of e.changedTouches) {
+        if (t.identifier === touchID) {
+          joystickActive = false;
+          joystick.style.display = 'none';
+          joystick.style.transform = 'translate(0,0)';
+          joystickX = joystickY = 0;
+          touchID = null;
+        }
+      }
+    });
+
+    // Reiniciar após Game Over
+    canvas.addEventListener('click', () => {
+      if (player && player.health <= 0) menu.style.display = 'flex';
+    });
+
+    console.log("%c🎮 Brawl Stars Mini pronto! Divirta-se!", "color:#00ffff; font-size:18px;");
+  </script>
+</body>
+</html>
