@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Brawl Stars Mini - Com Mapa e Paredes</title>
+  <title>Brawl Stars Mini - Com Arbustos</title>
   <style>
     body { margin:0; background:#111; overflow:hidden; touch-action:none; font-family: Arial, sans-serif; }
     canvas { display:block; margin:0 auto; background:#2a5; }
@@ -86,12 +86,20 @@
     const superFill = document.getElementById('superFill');
     const superText = document.getElementById('superText');
 
-    // ====================== PAREDES ======================
+    // ====================== MAPA ======================
     const walls = [
-      {x: 200, y: 180, w: 400, h: 25},   // horizontal superior
-      {x: 200, y: 395, w: 400, h: 25},   // horizontal inferior
-      {x: 180, y: 200, w: 25, h: 200},   // vertical esquerda
-      {x: 595, y: 200, w: 25, h: 200}    // vertical direita
+      {x: 200, y: 170, w: 400, h: 30},
+      {x: 200, y: 400, w: 400, h: 30},
+      {x: 170, y: 190, w: 30, h: 220},
+      {x: 600, y: 190, w: 30, h: 220}
+    ];
+
+    const bushes = [
+      {x: 80, y: 80, w: 120, h: 100},
+      {x: 600, y: 80, w: 120, h: 100},
+      {x: 80, y: 420, w: 120, h: 100},
+      {x: 600, y: 420, w: 120, h: 100},
+      {x: 320, y: 250, w: 160, h: 100}
     ];
 
     function rectCollide(a, b) {
@@ -99,18 +107,24 @@
                a.y + a.size/2 < b.y || a.y - a.size/2 > b.y + b.h);
     }
 
+    function isInBush(entity) {
+      return bushes.some(b => rectCollide(entity, b));
+    }
+
     function spawnEnemy() {
+      let attempts = 0;
       let x, y;
       do {
-        x = Math.random() * canvas.width;
-        y = Math.random() * canvas.height;
-      } while (walls.some(w => rectCollide({x, y, size: 30}, w)));
+        x = Math.random() * (canvas.width - 100) + 50;
+        y = Math.random() * (canvas.height - 100) + 50;
+        attempts++;
+      } while (walls.some(w => rectCollide({x, y, size: 30}, w)) && attempts < 50);
 
       enemies.push({
-        x: x < 100 ? -40 : canvas.width + 40,
+        x: x < 200 ? -40 : canvas.width + 40,
         y: y,
         size: 24,
-        speed: 1.7,
+        speed: 1.65,
         color: '#ff4444',
         health: 65
       });
@@ -142,15 +156,21 @@
         isSuperReady = false;
         superFill.style.width = '0%';
         superText.style.opacity = '0';
-        createExplosion(player.x, player.y, '#00ffff', 40);
+        createExplosion(player.x, player.y, '#00ffff', 45);
       }
     }
 
     function createExplosion(x, y, color, count = 15) {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = 2.5 + Math.random() * 5;
-        particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 32, color });
+        const speed = 2.5 + Math.random() * 6;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 35,
+          color: color
+        });
       }
     }
 
@@ -158,16 +178,22 @@
       ctx.fillStyle = '#2a5';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Desenha paredes (estilo Brawl Stars)
+      // Desenha paredes
       ctx.fillStyle = '#1e4d2b';
       ctx.strokeStyle = '#0f2a18';
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 8;
       walls.forEach(w => {
         ctx.fillRect(w.x, w.y, w.w, w.h);
         ctx.strokeRect(w.x, w.y, w.w, w.h);
       });
 
-      // Movimento jogador + colisão com paredes
+      // Desenha arbustos
+      ctx.fillStyle = '#1e7d3b';
+      ctx.globalAlpha = 0.85;
+      bushes.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+      ctx.globalAlpha = 1;
+
+      // Movimento jogador
       let dx = 0, dy = 0;
       if (keys['w'] || keys['arrowup']) dy -= 1;
       if (keys['s'] || keys['arrowdown']) dy += 1;
@@ -177,25 +203,28 @@
 
       if (dx || dy) {
         const len = Math.hypot(dx, dy);
-        const newX = player.x + (dx / len) * player.speed;
-        const newY = player.y + (dy / len) * player.speed;
+        let newX = player.x + (dx / len) * player.speed;
+        let newY = player.y + (dy / len) * player.speed;
 
-        let canMoveX = true, canMoveY = true;
-        const tempPlayer = {x: newX, y: player.y, size: player.size};
-        const tempPlayerY = {x: player.x, y: newY, size: player.size};
+        // Colisão com paredes
+        let canX = true, canY = true;
+        const testX = {x: newX, y: player.y, size: player.size};
+        const testY = {x: player.x, y: newY, size: player.size};
 
         walls.forEach(w => {
-          if (rectCollide(tempPlayer, w)) canMoveX = false;
-          if (rectCollide(tempPlayerY, w)) canMoveY = false;
+          if (rectCollide(testX, w)) canX = false;
+          if (rectCollide(testY, w)) canY = false;
         });
 
-        if (canMoveX) player.x = newX;
-        if (canMoveY) player.y = newY;
+        if (canX) player.x = newX;
+        if (canY) player.y = newY;
       }
 
       player.angle = Math.atan2(mouseY - player.y, mouseX - player.x);
 
-      // Desenha Jogador
+      // Desenha Jogador (com transparência se estiver em arbusto)
+      const inBush = isInBush(player);
+      ctx.globalAlpha = inBush ? 0.55 : 1.0;
       ctx.save();
       ctx.translate(player.x, player.y);
       ctx.rotate(player.angle);
@@ -210,17 +239,14 @@
       ctx.fillStyle = '#ddd';
       ctx.fillRect(15, -7, 25, 14);
       ctx.restore();
+      ctx.globalAlpha = 1;
 
-      // Balas + colisão com paredes
+      // Balas
       for (let i = bullets.length-1; i >= 0; i--) {
         let b = bullets[i];
         b.x += b.vx; b.y += b.vy; b.life--;
 
-        // Colisão com paredes
-        let hitWall = false;
-        walls.forEach(w => {
-          if (b.x > w.x && b.x < w.x + w.w && b.y > w.y && b.y < w.y + w.h) hitWall = true;
-        });
+        let hitWall = walls.some(w => b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h);
 
         if (hitWall || b.life <= 0 || b.x < -50 || b.x > canvas.width+50 || b.y < -50 || b.y > canvas.height+50) {
           bullets.splice(i,1);
@@ -240,17 +266,15 @@
         let newX = e.x + (dx/d) * e.speed;
         let newY = e.y + (dy/d) * e.speed;
 
-        // Colisão inimigo com paredes
-        let canMove = true;
-        walls.forEach(w => {
-          if (rectCollide({x: newX, y: newY, size: e.size}, w)) canMove = false;
-        });
-        if (canMove) {
+        // Colisão com paredes
+        if (!walls.some(w => rectCollide({x:newX, y:newY, size:e.size}, w))) {
           e.x = newX;
           e.y = newY;
         }
 
-        // Desenha inimigo
+        const enemyInBush = isInBush(e);
+        ctx.globalAlpha = enemyInBush ? 0.55 : 1.0;
+
         ctx.fillStyle = e.color;
         ctx.beginPath(); ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = 'white';
@@ -259,6 +283,8 @@
         ctx.fillStyle = 'black';
         ctx.beginPath(); ctx.arc(e.x-6,e.y-6,2.5,0,Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(e.x+8,e.y-6,2.5,0,Math.PI*2); ctx.fill();
+
+        ctx.globalAlpha = 1;
 
         // Colisão com balas
         for (let j = bullets.length-1; j >= 0; j--) {
@@ -269,9 +295,8 @@
             createExplosion(e.x, e.y, '#ffaa00', 10);
 
             if (b.isSuper) {
-              // Dano em área do Super
               enemies.forEach(en => {
-                if (Math.hypot(en.x - e.x, en.y - e.y) < 90) en.health -= 25;
+                if (Math.hypot(en.x - e.x, en.y - e.y) < 95) en.health -= 28;
               });
             }
           }
@@ -280,7 +305,7 @@
         if (e.health <= 0) {
           score += 10;
           scoreDiv.textContent = `Score: ${score}`;
-          superCharge = Math.min(100, superCharge + 15);
+          superCharge = Math.min(100, superCharge + 16);
           superFill.style.width = superCharge + '%';
 
           if (superCharge >= 100 && !isSuperReady) {
@@ -289,18 +314,18 @@
             setTimeout(() => superText.style.opacity = '0', 1800);
           }
 
-          createExplosion(e.x, e.y, '#ff5500', 28);
+          createExplosion(e.x, e.y, '#ff5500', 30);
           enemies.splice(i,1);
           continue;
         }
 
-        if (Math.hypot(player.x - e.x, player.y - e.y) < 38) player.health -= 0.4;
+        if (Math.hypot(player.x - e.x, player.y - e.y) < 38) player.health -= 0.35;
       }
 
       // Partículas
       for (let i = particles.length-1; i >= 0; i--) {
         let p = particles[i];
-        p.x += p.vx; p.y += p.vy; p.life--; p.vx *= 0.94; p.vy *= 0.94;
+        p.x += p.vx; p.y += p.vy; p.life--; p.vx *= 0.93; p.vy *= 0.93;
         ctx.globalAlpha = p.life / 35;
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x-3, p.y-3, 7, 7);
@@ -332,7 +357,7 @@
         return;
       }
 
-      if (Math.random() < 0.025 && enemies.length < 8) spawnEnemy();
+      if (Math.random() < 0.023 && enemies.length < 9) spawnEnemy();
 
       requestAnimationFrame(gameLoop);
     }
