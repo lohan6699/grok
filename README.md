@@ -1,579 +1,101 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Brawl Stars Mini</title>
-  <style>
-    body { margin:0; background:#111; overflow:hidden; touch-action:none; font-family: Arial, sans-serif; }
-    canvas { display:block; margin:0 auto; background:#2a5; }
-    #menu {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
-      align-items: center; justify-content: center; color: white; z-index: 100;
-    }
-    .brawler {
-      width: 180px; height: 180px; margin: 15px; border: 5px solid #fff;
-      border-radius: 20px; display: flex; align-items: center; justify-content: center;
-      font-size: 80px; cursor: pointer; transition: 0.2s;
-    }
-    .brawler:hover { transform: scale(1.1); border-color: #00ffff; }
-   
-    #joystick {
-      position: absolute; bottom: 30px; left: 30px;
-      width: 130px; height: 130px;
-      background: rgba(255,255,255,0.25);
-      border: 3px solid rgba(255,255,255,0.6);
-      border-radius: 50%;
-      display: none;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    #fire {
-      position: absolute; bottom: 40px; right: 40px;
-      width: 90px; height: 90px;
-      background: rgba(255,50,50,0.5);
-      border: 4px solid #ff0;
-      border-radius: 50%;
-      display: none;
-      font-size: 40px;
-      align-items: center; justify-content: center;
-      color: white; text-shadow: 0 0 10px black;
-    }
-    #score { position: absolute; top: 15px; left: 20px; color: white; font-size: 28px; font-weight: bold; text-shadow: 2px 2px 4px black; }
-    #superBar { position: absolute; top: 55px; left: 20px; width: 220px; height: 20px; background: rgba(0,0,0,0.6); border: 3px solid #00ffff; border-radius: 10px; overflow: hidden; }
-    #superFill { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffff, #0088ff); }
-    #superText { position: absolute; top: 80px; left: 20px; color: #00ffff; font-size: 18px; font-weight: bold; text-shadow: 0 0 8px #00ffff; opacity: 0; transition: opacity 0.4s; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Mini Ninja CSS</title>
+    <style>
+        :root {
+            --ninja-red: #d32f2f;
+            --ninja-black: #1a1a1a;
+            --ninja-skin: #ffe0b2;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .ninja {
+            position: relative;
+            width: 100px;
+            height: 150px;
+        }
+
+        /* Cabeça e Capuz */
+        .head {
+            position: absolute;
+            width: 80px;
+            height: 70px;
+            background-color: var(--ninja-red);
+            border-radius: 15px;
+            left: 10px;
+            z-index: 2;
+        }
+
+        /* Abertura da Máscara (Rosto) */
+        .face-slot {
+            position: absolute;
+            width: 60px;
+            height: 20px;
+            background-color: var(--ninja-skin);
+            top: 20px;
+            left: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        /* Olhos */
+        .eyes {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: black;
+            border-radius: 50%;
+            top: 6px;
+            box-shadow: 35px 0 0 black; /* Segundo olho */
+            left: 10px;
+        }
+
+        /* Corpo (Tronco) */
+        .body {
+            position: absolute;
+            width: 90px;
+            height: 80px;
+            background-color: var(--ninja-red);
+            top: 75px;
+            left: 5px;
+            border-radius: 10px 10px 5px 5px;
+            border-bottom: 10px solid var(--ninja-black); /* Cinto */
+        }
+
+        /* Detalhe da roupa (O "V") */
+        .detail {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid var(--ninja-black);
+            left: 25px;
+            opacity: 0.3;
+        }
+    </style>
 </head>
 <body>
 
-  <div id="menu">
-    <h1>Escolha seu Brawler</h1>
-    <div style="display:flex; gap:30px;">
-      <div class="brawler" onclick="selectBrawler(0)" style="background:#00aaff;">🔫</div>
-      <div class="brawler" onclick="selectBrawler(1)" style="background:#ffaa00;">🏹</div>
-      <div class="brawler" onclick="selectBrawler(2)" style="background:#ff4444;">🐂</div>
+    <div class="ninja">
+        <div class="head">
+            <div class="face-slot">
+                <div class="eyes"></div>
+            </div>
+        </div>
+        <div class="body">
+            <div class="detail"></div>
+        </div>
     </div>
-    <p style="margin-top:20px;">Shelly &nbsp;&nbsp;&nbsp; Colt &nbsp;&nbsp;&nbsp; Bull</p>
-  </div>
 
-  <div id="score">Score: 0</div>
-  <div id="superBar"><div id="superFill"></div></div>
-  <div id="superText">SUPER PRONTO!</div>
-
-  <canvas id="game"></canvas>
-  <div id="joystick"></div>
-  <div id="fire">🔫</div>
-
-  <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 800;
-    canvas.height = 600;
-
-    let player, bullets = [], enemies = [], particles = [], score = 0, superCharge = 0, isSuperReady = false;
-    let keys = {}, mouseX = 400, mouseY = 300, lastShot = 0;
-    let joystickActive = false, joystickX = 0, joystickY = 0, joyCenterX = 0, joyCenterY = 0;
-    let touchID = null;
-
-    const scoreDiv = document.getElementById('score');
-    const superFill = document.getElementById('superFill');
-    const superText = document.getElementById('superText');
-    const menu = document.getElementById('menu');
-    const fireBtn = document.getElementById('fire');
-    const joystickDiv = document.getElementById('joystick');
-
-    // Brawlers
-    const brawlers = [
-      { name: "Shelly", color: "#00aaff", speed: 4.8, damage: 32, health: 100, superDamage: 60 },
-      { name: "Colt",   color: "#ffaa00", speed: 4.3, damage: 28, health: 85,  superDamage: 45 },
-      { name: "Bull",   color: "#ff4444", speed: 5.2, damage: 35, health: 130, superDamage: 70 }
-    ];
-
-    let currentBrawler = 0;
-
-    function selectBrawler(id) {
-      currentBrawler = id;
-      menu.style.display = 'none';
-      startGame();
-    }
-
-    const walls = [
-      {x: 200, y: 170, w: 400, h: 30},
-      {x: 200, y: 400, w: 400, h: 30},
-      {x: 170, y: 190, w: 30, h: 220},
-      {x: 600, y: 190, w: 30, h: 220}
-    ];
-
-    const bushes = [
-      {x: 80, y: 80, w: 120, h: 100},
-      {x: 600, y: 80, w: 120, h: 100},
-      {x: 80, y: 420, w: 120, h: 100},
-      {x: 600, y: 420, w: 120, h: 100},
-      {x: 320, y: 250, w: 160, h: 100}
-    ];
-
-    function rectCollide(a, b) {
-      return !(a.x + a.size/2 < b.x || a.x - a.size/2 > b.x + b.w ||
-               a.y + a.size/2 < b.y || a.y - a.size/2 > b.y + b.h);
-    }
-
-    function spawnEnemy() {
-      const x = Math.random() * (canvas.width - 100) + 50;
-      const y = Math.random() * (canvas.height - 100) + 50;
-      enemies.push({
-        x: x < 200 ? -40 : canvas.width + 40,
-        y: y,
-        size: 24,
-        speed: 1.65,
-        color: '#ff4444',
-        health: 65
-      });
-    }
-
-    function shoot(isSuper = false) {
-      const b = brawlers[currentBrawler];
-      const now = Date.now();
-      if (!isSuper && now - lastShot < 220) return;
-      lastShot = now;
-
-      const dx = mouseX - player.x;
-      const dy = mouseY - player.y;
-      const dist = Math.hypot(dx, dy) || 1;
-
-      bullets.push({
-        x: player.x, y: player.y,
-        vx: (dx / dist) * (isSuper ? 14 : 11),
-        vy: (dy / dist) * (isSuper ? 14 : 11),
-        size: isSuper ? 14 : 7,
-        life: 80,
-        damage: isSuper ? b.superDamage : b.damage,
-        color: isSuper ? '#00ffff' : '#ffff00',
-        isSuper: isSuper
-      });
-
-      if (isSuper) {
-        superCharge = 0; 
-        isSuperReady = false;
-        superFill.style.width = '0%';
-        superText.style.opacity = '0';
-
-        if (currentBrawler === 2) { // Bull - Dash
-          const dashSpeed = 18;
-          player.x += (dx / dist) * dashSpeed;
-          player.y += (dy / dist) * dashSpeed;
-        }
-        createExplosion(player.x, player.y, '#00ffff', currentBrawler === 0 ? 50 : 35);
-      }
-    }
-
-    function createExplosion(x, y, color, count = 20) {
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 3 + Math.random() * 6;
-        particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 35, color });
-      }
-    }
-
-    function startGame() {
-      const b = brawlers[currentBrawler];
-      player = { 
-        x: 400, y: 300, size: 28, speed: b.speed, 
-        color: b.color, health: b.health, angle: 0 
-      };
-      bullets = []; enemies = []; particles = []; 
-      score = 0; superCharge = 0; isSuperReady = false;
-      scoreDiv.textContent = 'Score: 0';
-      superFill.style.width = '0%';
-      for (let i = 0; i < 4; i++) spawnEnemy();
-      gameLoop();
-    }
-
-    function gameLoop() {
-      ctx.fillStyle = '#2a5';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Paredes
-      ctx.fillStyle = '#1e4d2b';
-      ctx.strokeStyle = '#0f2a18';
-      ctx.lineWidth = 8;
-      walls.forEach(w => {
-        ctx.fillRect(w.x, w.y, w.w, w.h);
-        ctx.strokeRect(w.x, w.y, w.w, w.h);
-      });
-
-      // Arbustos
-      ctx.fillStyle = '#1e7d3b';
-      ctx.globalAlpha = 0.85;
-      bushes.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
-      ctx.globalAlpha = 1;
-
-      // Movimento do jogador
-      let dx = 0, dy = 0;
-      if (keys['w'] || keys['arrowup']) dy -= 1;
-      if (keys['s'] || keys['arrowdown']) dy += 1;
-      if (keys['a'] || keys['arrowleft']) dx -= 1;
-      if (keys['d'] || keys['arrowright']) dx += 1;
-      if (joystickActive) { dx += joystickX; dy += joystickY; }
-
-      if (dx || dy) {
-        const len = Math.hypot(dx, dy) || 1;
-        let newX = player.x + (dx / len) * player.speed;
-        let newY = player.y + (dy / len) * player.speed;
-
-        let canX = true, canY = true;
-        const testX = {x: newX, y: player.y, size: player.size};
-        const testY = {x: player.x, y: newY, size: player.size};
-
-        walls.forEach(w => {
-          if (rectCollide(testX, w)) canX = false;
-          if (rectCollide(testY, w)) canY = false;
-        });
-
-        if (canX) player.x = newX;
-        if (canY) player.y = newY;
-
-        // Limites da tela
-        player.x = Math.max(player.size/2, Math.min(canvas.width - player.size/2, player.x));
-        player.y = Math.max(player.size/2, Math.min(canvas.height - player.size/2, player.y));
-      }
-
-      // Ângulo do jogador
-      player.angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-
-      // Desenhar jogador
-      ctx.save();
-      ctx.translate(player.x, player.y);
-      ctx.rotate(player.angle);
-      ctx.fillStyle = player.color;
-      ctx.beginPath();
-      ctx.arc(0, 0, player.size/2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#111';
-      ctx.fillRect(10, -7, 20, 14); // arma
-      ctx.restore();
-
-      // Balas
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i];
-        b.x += b.vx;
-        b.y += b.vy;
-        b.life--;
-
-        ctx.fillStyle = b.color;
-        ctx.beginPath(); 
-        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); 
-        ctx.fill();
-
-        if (b.isSuper) {
-          ctx.strokeStyle = '#fff'; 
-          ctx.lineWidth = 3;
-          ctx.beginPath(); 
-          ctx.arc(b.x, b.y, b.size + 5, 0, Math.PI * 2); 
-          ctx.stroke();
-        }
-
-        if (b.life <= 0 || walls.some(w => rectCollide(b, w))) {
-          bullets.splice(i, 1);
-        }
-      }
-
-      // Inimigos
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        const dx = player.x - e.x;
-        const dy = player.y - e.y;
-        const dist = Math.hypot(dx, dy) || 1;
-
-        e.x += (dx / dist) * e.speed;
-        e.y += (dy / dist) * e.speed;
-
-        // Desenhar inimigo
-        ctx.fillStyle = e.color;
-        ctx.beginPath(); 
-        ctx.arc(e.x, e.y, e.size/2, 0, Math.PI * 2); 
-        ctx.fill();
-
-        // Olhos
-        ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(e.x - 6, e.y - 5, 5, 0, Math.PI * 2);
-        ctx.arc(e.x + 6, e.y - 5, 5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.arc(e.x - 6 + (dx/dist)*3, e.y - 5 + (dy/dist)*3, 2.5, 0, Math.PI * 2);
-        ctx.arc(e.x + 6 + (dx/dist)*3, e.y - 5 + (dy/dist)*3, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Colisão com jogador
-        if (Math.hypot(player.x - e.x, player.y - e.y) < player.size/2 + e.size/2) {
-          player.health -= 1.2;
-          createExplosion(e.x, e.y, '#ff0000', 15);
-          enemies.splice(i, 1);
-          spawnEnemy();
-        }
-      }
-
-      // Colisão bala × inimigo
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i];
-        for (let j = enemies.length - 1; j >= 0; j--) {
-          const e = enemies[j];
-          if (Math.hypot(b.x - e.x, b.y - e.y) < b.size + e.size/2) {
-            e.health -= b.damage;
-            createExplosion(b.x, b.y, '#ffff88', 10);
-            bullets.splice(i, 1);
-
-            if (e.health <= 0) {
-              score += 10;
-              scoreDiv.textContent = `Score: ${score}`;
-              createExplosion(e.x, e.y, '#ff8800', 30);
-              enemies.splice(j, 1);
-              spawnEnemy();
-
-              superCharge = Math.min(100, superCharge + (b.isSuper ? 40 : 14));
-              if (superCharge >= 100 && !isSuperReady) {
-                isSuperReady = true;
-                superText.style.opacity = '1';
-              }
-              superFill.style.width = superCharge + '%';
-            }
-            break;
-          }
-        }
-      }
-
-      // Partículas
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life--;
-        p.vx *= 0.95;
-        p.vy *= 0.95;
-
-        ctx.globalAlpha = p.life / 35;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
-        if (p.life <= 0) particles.splice(i, 1);
-      }
-      ctx.globalAlpha = 1;
-
-      // Game Over
-      if (player.health <= 0) {
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ff4444';
-        ctx.font = 'bold 70px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 20);
-
-        ctx.fillStyle = '#fff';
-        ctx.font = '30px Arial';
-        ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2 + 50);
-
-        ctx.font = '24px Arial';
-        ctx.fillText('Clique para voltar ao menu', canvas.width/2, canvas.height/2 + 100);
-        return;
-      }
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    // ====================== CONTROLES ======================
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-    window.addEventListener('keyup',   e => keys[e.key.toLowerCase()] = false);
-
-    canvas.addEventListener('mousemove', e => {
-      const rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top;
-    });
-
-    canvas.addEventListener('click', () => { 
-      if (player && player.health > 0) shoot(false); 
-    });
-
-    // Super (botão direito ou espaço)
-    canvas.addEventListener('contextmenu', e => { 
-      e.preventDefault(); 
-      if (isSuperReady && player && player.health > 0) shoot(true); 
-    });
-    window.addEventListener('keydown', e => { 
-      if (e.key === ' ' && isSuperReady && player && player.health > 0) {
-        e.preventDefault(); 
-        shoot(true); 
-      }
-    });
-
-    // Touch Controls
-    canvas.addEventListener('touchstart', e => {
-      for (let t of e.changedTouches) {
-        const rect = canvas.getBoundingClientRect();
-        const tx = t.clientX - rect.left;
-        const ty = t.clientY - rect.top;
-
-        if (tx < 280 && ty > canvas.height - 220) {
-          // Joystick
-          joystickDiv.style.display = 'block';
-          joyCenterX = t.clientX;
-          joyCenterY = t.clientY;
-          joystickDiv.style.left = (joyCenterX - 65) + 'px';
-          joystickDiv.style.top  = (joyCenterY - 65) + 'px';
-          joystickActive = true;
-          touchID = t.identifier;
-        } 
-        else if (tx > canvas.width - 180 && ty > canvas.height - 180) {
-          // Fire
-          if (isSuperReady) shoot(true);
-          else shoot(false);
-        }
-      }
-    });
-
-    window.addEventListener('touchmove', e => {
-      if (!joystickActive) return;
-      for (let t of e.changedTouches) {
-        if (t.identifier === touchID) {
-          let dx = t.clientX - joyCenterX;
-          let dy = t.clientY - joyCenterY;
-          const dist = Math.hypot(dx, dy);
-          const max = 55;
-          if (dist > max) {
-            dx = (dx / dist) * max;
-            dy = (dy / dist) * max;
-          }
-          joystickX = dx / max;
-          joystickY = dy / max;
-          joystickDiv.style.transform = `translate(${dx}px, ${dy}px)`;
-        }
-      }
-    });
-
-    window.addEventListener('touchend', e => {
-      for (let t of e.changedTouches) {
-        if (t.identifier === touchID) {
-          joystickActive = false;
-          joystickDiv.style.display = 'none';
-          joystickDiv.style.transform = 'translate(0,0)';
-          joystickX = joystickY = 0;
-          touchID = null;
-        }
-      }
-    });
-
-    // Mostrar botão de tiro no celular
-    if ('ontouchstart' in window) {
-      fireBtn.style.display = 'flex';
-    }
-
-    // Reiniciar após Game Over
-    canvas.addEventListener('click', () => {
-      if (player && player.health <= 0) menu.style.display = 'flex';
-    });
-
-    console.log("%c🎮 Brawl Stars Mini - Pronto para jogar! Divirta-se!", "color:#00ffcc; font-size:18px; font-weight:bold");
-  </script>
 </body>
 </html>
-function spawnEnemy() {
-  const side = Math.floor(Math.random() * 4); // 0: Top, 1: Right, 2: Bottom, 3: Left
-  let x, y;
-  if (side === 0) { x = Math.random() * canvas.width; y = -30; }
-  else if (side === 1) { x = canvas.width + 30; y = Math.random() * canvas.height; }
-  else if (side === 2) { x = Math.random() * canvas.width; y = canvas.height + 30; }
-  else { x = -30; y = Math.random() * canvas.height; }
-  
-  enemies.push({ x, y, size: 24, speed: 1.65, color: '#ff4444', health: 65 });
-}
-if (currentBrawler === 0) { // Shelly Spread
-    for (let i = -2; i <= 2; i++) {
-        const spreadAngle = Math.atan2(dy, dx) + (i * 0.2);
-        bullets.push({
-            x: player.x, y: player.y,
-            vx: Math.cos(spreadAngle) * 10,
-            vy: Math.sin(spreadAngle) * 10,
-            size: 6, life: 30, // Short range
-            damage: b.damage / 2, color: '#ffff00'
-        });
-    }
-}
-function shoot(isSuper = false) {
-  const b = brawlers[currentBrawler];
-  const now = Date.now();
-  
-  // Custom cooldowns (Colt fires faster, Bull slower)
-  const cooldown = currentBrawler === 1 ? 180 : (currentBrawler === 2 ? 400 : 220);
-  if (!isSuper && now - lastShot < cooldown) return;
-  lastShot = now;
-
-  const dx = mouseX - player.x;
-  const dy = mouseY - player.y;
-  const angle = Math.atan2(dy, dx);
-  const dist = Math.hypot(dx, dy) || 1;
-
-  if (isSuper) {
-    handleSuper(b, dx, dy, angle, dist);
-  } else {
-    handleNormalAttack(b, dx, dy, angle);
-  }
-}
-
-function handleNormalAttack(b, dx, dy, angle) {
-  if (currentBrawler === 0) { // Shelly: 5-bullet Spread
-    for (let i = -2; i <= 2; i++) {
-      const sAngle = angle + (i * 0.15);
-      createBullet(player.x, player.y, sAngle, 11, 25, b.damage / 1.5, '#ffff00');
-    }
-  } 
-  else if (currentBrawler === 1) { // Colt: Straight Accurate Shot
-    createBullet(player.x, player.y, angle, 14, 60, b.damage, '#ffff00');
-  } 
-  else if (currentBrawler === 2) { // Bull: Heavy 3-bullet Spread (Short Range)
-    for (let i = -1; i <= 1; i++) {
-      const sAngle = angle + (i * 0.2);
-      createBullet(player.x, player.y, sAngle, 10, 15, b.damage, '#ffcc00');
-    }
-  }
-}
-
-function handleSuper(b, dx, dy, angle, dist) {
-  superCharge = 0; 
-  isSuperReady = false;
-  superFill.style.width = '0%';
-  superText.style.opacity = '0';
-
-  if (currentBrawler === 0) { // Shelly Super: Massive Spread + Knockback feel
-    for (let i = -4; i <= 4; i++) {
-      const sAngle = angle + (i * 0.2);
-      createBullet(player.x, player.y, sAngle, 15, 35, b.superDamage, '#00ffff', true);
-    }
-  } 
-  else if (currentBrawler === 1) { // Colt Super: Mega Bullet
-    createBullet(player.x, player.y, angle, 18, 100, b.superDamage * 2, '#00ffff', true);
-  }
-  else if (currentBrawler === 2) { // Bull Super: Dash
-    const dashSpeed = 25;
-    player.x += (dx / dist) * 150; // Instant boost forward
-    player.y += (dy / dist) * 150;
-    createExplosion(player.x, player.y, '#ff0000', 40);
-  }
-  
-  createExplosion(player.x, player.y, '#00ffff', 40);
-}
-
-// Helper to clean up bullet creation code
-function createBullet(x, y, ang, speed, life, dmg, color, isSuper = false) {
-  bullets.push({
-    x: x, y: y,
-    vx: Math.cos(ang) * speed,
-    vy: Math.sin(ang) * speed,
-    size: isSuper ? 12 : 6,
-    life: life,
-    damage: dmg,
-    color: color,
-    isSuper: isSuper
-  });
-}
