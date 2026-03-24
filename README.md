@@ -18,7 +18,7 @@
       font-size: 80px; cursor: pointer; transition: 0.2s;
     }
     .brawler:hover { transform: scale(1.1); border-color: #00ffff; }
-    
+   
     #joystick {
       position: absolute; bottom: 30px; left: 30px;
       width: 130px; height: 130px;
@@ -34,7 +34,7 @@
       background: rgba(255,50,50,0.5);
       border: 4px solid #ff0;
       border-radius: 50%;
-      display: none; /* será mostrado no mobile */
+      display: none;
       font-size: 40px;
       align-items: center; justify-content: center;
       color: white; text-shadow: 0 0 10px black;
@@ -74,7 +74,7 @@
     let player, bullets = [], enemies = [], particles = [], score = 0, superCharge = 0, isSuperReady = false;
     let keys = {}, mouseX = 400, mouseY = 300, lastShot = 0;
     let joystickActive = false, joystickX = 0, joystickY = 0, joyCenterX = 0, joyCenterY = 0;
-    let touchFire = false;
+    let touchID = null;
 
     const scoreDiv = document.getElementById('score');
     const superFill = document.getElementById('superFill');
@@ -98,14 +98,14 @@
       startGame();
     }
 
-    const walls = [ /* mesmas paredes */ 
+    const walls = [
       {x: 200, y: 170, w: 400, h: 30},
       {x: 200, y: 400, w: 400, h: 30},
       {x: 170, y: 190, w: 30, h: 220},
       {x: 600, y: 190, w: 30, h: 220}
     ];
 
-    const bushes = [ /* mesmos arbustos */ 
+    const bushes = [
       {x: 80, y: 80, w: 120, h: 100},
       {x: 600, y: 80, w: 120, h: 100},
       {x: 80, y: 420, w: 120, h: 100},
@@ -153,11 +153,12 @@
       });
 
       if (isSuper) {
-        superCharge = 0; isSuperReady = false;
+        superCharge = 0; 
+        isSuperReady = false;
         superFill.style.width = '0%';
         superText.style.opacity = '0';
 
-        if (currentBrawler === 2) { // Bull dash
+        if (currentBrawler === 2) { // Bull - Dash
           const dashSpeed = 18;
           player.x += (dx / dist) * dashSpeed;
           player.y += (dy / dist) * dashSpeed;
@@ -176,8 +177,12 @@
 
     function startGame() {
       const b = brawlers[currentBrawler];
-      player = { x: 400, y: 300, size: 28, speed: b.speed, color: b.color, health: b.health, angle: 0 };
-      bullets = []; enemies = []; particles = []; score = 0; superCharge = 0; isSuperReady = false;
+      player = { 
+        x: 400, y: 300, size: 28, speed: b.speed, 
+        color: b.color, health: b.health, angle: 0 
+      };
+      bullets = []; enemies = []; particles = []; 
+      score = 0; superCharge = 0; isSuperReady = false;
       scoreDiv.textContent = 'Score: 0';
       superFill.style.width = '0%';
       for (let i = 0; i < 4; i++) spawnEnemy();
@@ -203,7 +208,7 @@
       bushes.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
       ctx.globalAlpha = 1;
 
-      // Movimento
+      // Movimento do jogador
       let dx = 0, dy = 0;
       if (keys['w'] || keys['arrowup']) dy -= 1;
       if (keys['s'] || keys['arrowdown']) dy += 1;
@@ -212,7 +217,7 @@
       if (joystickActive) { dx += joystickX; dy += joystickY; }
 
       if (dx || dy) {
-        const len = Math.hypot(dx, dy);
+        const len = Math.hypot(dx, dy) || 1;
         let newX = player.x + (dx / len) * player.speed;
         let newY = player.y + (dy / len) * player.speed;
 
@@ -228,11 +233,12 @@
         if (canX) player.x = newX;
         if (canY) player.y = newY;
 
+        // Limites da tela
         player.x = Math.max(player.size/2, Math.min(canvas.width - player.size/2, player.x));
         player.y = Math.max(player.size/2, Math.min(canvas.height - player.size/2, player.y));
       }
 
-      // Ângulo
+      // Ângulo do jogador
       player.angle = Math.atan2(mouseY - player.y, mouseX - player.x);
 
       // Desenhar jogador
@@ -241,68 +247,90 @@
       ctx.rotate(player.angle);
       ctx.fillStyle = player.color;
       ctx.beginPath();
-      ctx.arc(0, 0, player.size/2, 0, Math.PI*2);
+      ctx.arc(0, 0, player.size/2, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#111';
-      ctx.fillRect(10, -7, 20, 14);
+      ctx.fillRect(10, -7, 20, 14); // arma
       ctx.restore();
 
-      // === Balas, Inimigos, Colisões, Partículas (mesmo código que você tinha, só mantive limpo) ===
       // Balas
-      for (let i = bullets.length-1; i >= 0; i--) {
+      for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
-        b.x += b.vx; b.y += b.vy; b.life--;
+        b.x += b.vx;
+        b.y += b.vy;
+        b.life--;
+
         ctx.fillStyle = b.color;
-        ctx.beginPath(); ctx.arc(b.x, b.y, b.size, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); 
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); 
+        ctx.fill();
+
         if (b.isSuper) {
-          ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.arc(b.x, b.y, b.size+5, 0, Math.PI*2); ctx.stroke();
+          ctx.strokeStyle = '#fff'; 
+          ctx.lineWidth = 3;
+          ctx.beginPath(); 
+          ctx.arc(b.x, b.y, b.size + 5, 0, Math.PI * 2); 
+          ctx.stroke();
         }
-        if (b.life <= 0 || walls.some(w => rectCollide(b, w))) { bullets.splice(i,1); continue; }
+
+        if (b.life <= 0 || walls.some(w => rectCollide(b, w))) {
+          bullets.splice(i, 1);
+        }
       }
 
-      // Inimigos + colisões (mantido igual ao seu último código)
-      for (let i = enemies.length-1; i >= 0; i--) {
+      // Inimigos
+      for (let i = enemies.length - 1; i >= 0; i--) {
         const e = enemies[i];
         const dx = player.x - e.x;
         const dy = player.y - e.y;
         const dist = Math.hypot(dx, dy) || 1;
+
         e.x += (dx / dist) * e.speed;
         e.y += (dy / dist) * e.speed;
 
+        // Desenhar inimigo
         ctx.fillStyle = e.color;
-        ctx.beginPath(); ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); 
+        ctx.arc(e.x, e.y, e.size/2, 0, Math.PI * 2); 
+        ctx.fill();
 
-        // olhos
+        // Olhos
         ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(e.x-6, e.y-5, 5, 0, Math.PI*2);
-        ctx.arc(e.x+6, e.y-5, 5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(e.x - 6, e.y - 5, 5, 0, Math.PI * 2);
+        ctx.arc(e.x + 6, e.y - 5, 5, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.fillStyle = '#000';
         ctx.beginPath();
-        ctx.arc(e.x-6 + (dx/dist)*3, e.y-5 + (dy/dist)*3, 2.5, 0, Math.PI*2);
-        ctx.arc(e.x+6 + (dx/dist)*3, e.y-5 + (dy/dist)*3, 2.5, 0, Math.PI*2); ctx.fill();
+        ctx.arc(e.x - 6 + (dx/dist)*3, e.y - 5 + (dy/dist)*3, 2.5, 0, Math.PI * 2);
+        ctx.arc(e.x + 6 + (dx/dist)*3, e.y - 5 + (dy/dist)*3, 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
+        // Colisão com jogador
         if (Math.hypot(player.x - e.x, player.y - e.y) < player.size/2 + e.size/2) {
           player.health -= 1.2;
           createExplosion(e.x, e.y, '#ff0000', 15);
-          enemies.splice(i,1); spawnEnemy();
+          enemies.splice(i, 1);
+          spawnEnemy();
         }
       }
 
       // Colisão bala × inimigo
-      for (let i = bullets.length-1; i >= 0; i--) {
+      for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
-        for (let j = enemies.length-1; j >= 0; j--) {
+        for (let j = enemies.length - 1; j >= 0; j--) {
           const e = enemies[j];
           if (Math.hypot(b.x - e.x, b.y - e.y) < b.size + e.size/2) {
             e.health -= b.damage;
             createExplosion(b.x, b.y, '#ffff88', 10);
-            bullets.splice(i,1);
+            bullets.splice(i, 1);
+
             if (e.health <= 0) {
               score += 10;
               scoreDiv.textContent = `Score: ${score}`;
               createExplosion(e.x, e.y, '#ff8800', 30);
-              enemies.splice(j,1);
+              enemies.splice(j, 1);
               spawnEnemy();
 
               superCharge = Math.min(100, superCharge + (b.isSuper ? 40 : 14));
@@ -318,27 +346,34 @@
       }
 
       // Partículas
-      for (let i = particles.length-1; i >= 0; i--) {
+      for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx; p.y += p.vy; p.life--; p.vx *= 0.95; p.vy *= 0.95;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        p.vx *= 0.95;
+        p.vy *= 0.95;
+
         ctx.globalAlpha = p.life / 35;
         ctx.fillStyle = p.color;
-        ctx.fillRect(p.x-3, p.y-3, 6, 6);
-        if (p.life <= 0) particles.splice(i,1);
+        ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
+        if (p.life <= 0) particles.splice(i, 1);
       }
       ctx.globalAlpha = 1;
 
       // Game Over
       if (player.health <= 0) {
         ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#ff4444';
         ctx.font = 'bold 70px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 20);
+
         ctx.fillStyle = '#fff';
         ctx.font = '30px Arial';
         ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2 + 50);
+
         ctx.font = '24px Arial';
         ctx.fillText('Clique para voltar ao menu', canvas.width/2, canvas.height/2 + 100);
         return;
@@ -357,15 +392,23 @@
       mouseY = e.clientY - rect.top;
     });
 
-    canvas.addEventListener('click', () => { if (player?.health > 0) shoot(false); });
+    canvas.addEventListener('click', () => { 
+      if (player && player.health > 0) shoot(false); 
+    });
 
-    // Super
-    canvas.addEventListener('contextmenu', e => { e.preventDefault(); if (isSuperReady) shoot(true); });
-    window.addEventListener('keydown', e => { if (e.key === ' ' && isSuperReady) { e.preventDefault(); shoot(true); }});
+    // Super (botão direito ou espaço)
+    canvas.addEventListener('contextmenu', e => { 
+      e.preventDefault(); 
+      if (isSuperReady && player && player.health > 0) shoot(true); 
+    });
+    window.addEventListener('keydown', e => { 
+      if (e.key === ' ' && isSuperReady && player && player.health > 0) {
+        e.preventDefault(); 
+        shoot(true); 
+      }
+    });
 
-    // Touch - Joystick + Fire Button
-    let touchID = null;
-
+    // Touch Controls
     canvas.addEventListener('touchstart', e => {
       for (let t of e.changedTouches) {
         const rect = canvas.getBoundingClientRect();
@@ -383,7 +426,7 @@
           touchID = t.identifier;
         } 
         else if (tx > canvas.width - 180 && ty > canvas.height - 180) {
-          // Fire button
+          // Fire
           if (isSuperReady) shoot(true);
           else shoot(false);
         }
@@ -398,7 +441,10 @@
           let dy = t.clientY - joyCenterY;
           const dist = Math.hypot(dx, dy);
           const max = 55;
-          if (dist > max) { dx = dx/dist * max; dy = dy/dist * max; }
+          if (dist > max) {
+            dx = (dx / dist) * max;
+            dy = (dy / dist) * max;
+          }
           joystickX = dx / max;
           joystickY = dy / max;
           joystickDiv.style.transform = `translate(${dx}px, ${dy}px)`;
@@ -419,19 +465,16 @@
     });
 
     // Mostrar botão de tiro no celular
-    function showMobileControls() {
-      if ('ontouchstart' in window) {
-        fireBtn.style.display = 'flex';
-      }
+    if ('ontouchstart' in window) {
+      fireBtn.style.display = 'flex';
     }
-    showMobileControls();
 
-    // Reiniciar
+    // Reiniciar após Game Over
     canvas.addEventListener('click', () => {
       if (player && player.health <= 0) menu.style.display = 'flex';
     });
 
-    console.log("%c🎮 Brawl Stars Mini - Versão Final Corrigida! Divirta-se!", "color:#00ffcc; font-size:18px; font-weight:bold");
+    console.log("%c🎮 Brawl Stars Mini - Pronto para jogar! Divirta-se!", "color:#00ffcc; font-size:18px; font-weight:bold");
   </script>
 </body>
 </html>
