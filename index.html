@@ -3,76 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ninjago LEGO Challenge</title>
+    <title>Ninjago LEGO Battle</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
         <h1>Ninjago LEGO Battle!</h1>
+        
         <div class="dojo-background">
             <div class="ninja-figure green" id="ninjaGreen">
                 <div class="head"></div>
-                <div class="body"></div>
+                <div class="body">
+                    <div class="belt"></div>
+                </div>
                 <div class="legs"></div>
                 <div class="weapon katana"></div>
             </div>
 
             <div class="ninja-figure red" id="ninjaRed">
                 <div class="head"></div>
-                <div class="body"></div>
+                <div class="body">
+                    <div class="belt"></div>
+                </div>
                 <div class="legs"></div>
                 <div class="weapon nunchaku"></div>
             </div>
 
-            <div class="action-text" id="actionText"></div>
+            <div class="action-text" id="actionText">Vez do Ninja Verde!</div>
         </div>
+
         <button onclick="resetGame()">Reiniciar Batalha</button>
     </div>
 
     <script>
-        const ninjaGreen = document.getElementById('ninjaGreen');
-        const ninjaRed = document.getElementById('ninjaRed');
-        const actionText = document.getElementById('actionText');
+        const green = document.getElementById('ninjaGreen');
+        const red = document.getElementById('ninjaRed');
+        const text = document.getElementById('actionText');
+        let greenTurn = true;
 
-        let greenTurn = true; // Controla de quem é a vez
-
-        ninjaGreen.addEventListener('click', () => {
-            if (greenTurn) {
-                ninjaGreen.classList.add('attack');
-                actionText.textContent = "Ninja Verde atacou!";
+        function attack(attacker, target, name) {
+            if ((greenTurn && attacker === green) || (!greenTurn && attacker === red)) {
+                attacker.classList.add('attack-anim');
+                target.classList.add('hit-anim');
+                text.textContent = `O Ninja ${name} atacou!`;
+                
                 setTimeout(() => {
-                    ninjaGreen.classList.remove('attack');
-                    greenTurn = false;
-                    actionText.textContent = "Vez do Ninja Vermelho...";
-                }, 800);
-            } else {
-                actionText.textContent = "Espere a sua vez, Ninja Verde!";
+                    attacker.classList.remove('attack-anim');
+                    target.classList.remove('hit-anim');
+                    greenTurn = !greenTurn;
+                    text.textContent = greenTurn ? "Vez do Ninja Verde!" : "Vez do Ninja Vermelho!";
+                }, 600);
             }
-        });
-
-        ninjaRed.addEventListener('click', () => {
-            if (!greenTurn) {
-                ninjaRed.classList.add('attack');
-                actionText.textContent = "Ninja Vermelho contra-atacou!";
-                setTimeout(() => {
-                    ninjaRed.classList.remove('attack');
-                    greenTurn = true;
-                    actionText.textContent = "Vez do Ninja Verde...";
-                }, 800);
-            } else {
-                actionText.textContent = "Espere a sua vez, Ninja Vermelho!";
-            }
-        });
-
-        function resetGame() {
-            ninjaGreen.classList.remove('attack');
-            ninjaRed.classList.remove('attack');
-            greenTurn = true;
-            actionText.textContent = "Comece a batalha! Vez do Ninja Verde...";
         }
 
-        // Inicializa o texto da ação
-        resetGame();
+        green.addEventListener('click', () => attack(green, red, 'Verde'));
+        red.addEventListener('click', () => attack(red, green, 'Vermelho'));
+
+        function resetGame() {
+            greenTurn = true;
+            text.textContent = "Vez do Ninja Verde!";
+        }
     </script>
 </body>
 </html>

@@ -1,270 +1,136 @@
 :root {
     --green-ninja: #4CAF50;
-    --green-ninja-dark: #388E3C;
     --red-ninja: #F44336;
-    --red-ninja-dark: #D32F2F;
-    --skin-color: #FDD835; /* Cor da pele LEGO */
-    --black-lego: #333;
-    --grey-lego: #B0BEC5;
+    --skin: #FDD835; /* Amarelo LEGO */
+    --black: #333;
 }
 
 body {
+    background-color: #2c3e50;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh;
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to right, #424242, #616161);
-    color: white;
-    overflow: hidden; /* Evita barras de rolagem */
+    font-family: 'Arial', sans-serif;
 }
 
 .game-container {
     text-align: center;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-    border: 3px solid var(--grey-lego);
-    position: relative;
-    max-width: 90%;
-    width: 800px;
-}
-
-h1 {
-    color: var(--skin-color);
-    margin-bottom: 25px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    color: white;
 }
 
 .dojo-background {
-    width: 100%;
-    height: 350px;
-    background: linear-gradient(to bottom, #8D6E63, #5D4037); /* Paredes e chão de madeira */
-    border: 4px solid var(--black-lego);
-    border-radius: 10px;
+    width: 600px;
+    height: 300px;
+    background: #8d6e63; /* Cor de madeira */
+    border: 10px solid #5d4037;
     position: relative;
+    margin: 20px;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end; /* Personagens na parte de baixo */
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: hidden; /* Garante que os ninjas não ultrapassem */
+    justify-content: space-around;
+    align-items: flex-end;
+    padding-bottom: 30px;
+    overflow: hidden;
 }
 
-/* Base para os bonecos LEGO */
+/* Base do Boneco LEGO */
 .ninja-figure {
-    position: absolute;
-    bottom: 20px; /* Acima da borda inferior */
     width: 60px;
-    height: 120px;
-    transform-origin: bottom center;
-    transition: transform 0.3s ease-out, left 0.3s ease-out, right 0.3s ease-out;
+    height: 110px;
+    position: relative;
     cursor: pointer;
-    filter: drop-shadow(0 5px 3px rgba(0,0,0,0.4));
+    transition: 0.3s;
 }
 
-.ninja-figure.green { left: 50px; }
-.ninja-figure.red { right: 50px; }
-
-/* Animação de ataque */
-.ninja-figure.attack {
-    transform: translateY(-20px) scale(1.1);
-}
-.ninja-figure.green.attack {
-    left: 150px; /* Move para a direita para "atacar" */
-}
-.ninja-figure.red.attack {
-    right: 150px; /* Move para a esquerda para "atacar" */
-}
-
-
-/* Partes do corpo LEGO */
 .head {
-    width: 40px;
-    height: 40px;
-    background-color: var(--skin-color);
-    border-radius: 50%;
-    position: absolute;
-    top: 0;
-    left: 10px;
-    border: 2px solid var(--black-lego);
-    box-sizing: border-box;
+    width: 35px;
+    height: 30px;
+    background: var(--skin);
+    border-radius: 8px;
+    margin: 0 auto;
+    border: 2px solid #000;
+    position: relative;
     z-index: 2;
 }
+
 .head::before { /* Olhos */
     content: '';
     position: absolute;
-    width: 5px;
-    height: 5px;
-    background-color: var(--black-lego);
+    width: 4px; height: 4px;
+    background: black;
     border-radius: 50%;
-    top: 12px;
-    left: 8px;
-    box-shadow: 20px 0 0 var(--black-lego);
+    top: 10px; left: 8px;
+    box-shadow: 15px 0 0 black;
 }
 
 .body {
-    width: 60px;
-    height: 50px;
-    position: absolute;
-    top: 35px;
-    left: 0;
+    width: 55px;
+    height: 45px;
+    margin: -5px auto 0;
     border-radius: 5px 5px 0 0;
-    border: 2px solid var(--black-lego);
-    box-sizing: border-box;
-    z-index: 1;
+    border: 2px solid #000;
+    position: relative;
 }
 
 .legs {
-    width: 60px;
-    height: 40px;
-    position: absolute;
-    top: 85px;
-    left: 0;
-    background-color: var(--black-lego);
-    border-radius: 0 0 10px 10px;
-    border: 2px solid var(--black-lego);
-    box-sizing: border-box;
-    overflow: hidden;
-}
-.legs::before, .legs::after { /* Pernas separadas */
-    content: '';
-    position: absolute;
-    width: 28px;
-    height: 100%;
-    background-color: inherit;
-    top: 0;
-}
-.legs::before { left: 0; border-right: 2px solid var(--black-lego); }
-.legs::after { right: 0; }
-
-/* Cores dos ninjas */
-.ninja-figure.green .body { background-color: var(--green-ninja); }
-.ninja-figure.green .body::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 10px;
-    background-color: var(--green-ninja-dark);
-    bottom: 0;
-    left: 0;
+    width: 55px;
+    height: 35px;
+    background: var(--black);
+    margin: 0 auto;
+    border-radius: 0 0 5px 5px;
 }
 
-.ninja-figure.red .body { background-color: var(--red-ninja); }
-.ninja-figure.red .body::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 10px;
-    background-color: var(--red-ninja-dark);
-    bottom: 0;
-    left: 0;
-}
+/* Cores específicas */
+.green .body { background: var(--green-ninja); }
+.red .body { background: var(--red-ninja); }
 
 /* Armas */
 .weapon {
     position: absolute;
-    z-index: 0; /* Fica atrás do corpo */
-    transform-origin: top center;
-}
-
-.katana {
     width: 5px;
-    height: 60px;
-    background-color: #757575; /* Lâmina */
-    border-radius: 2px;
-    top: 50px;
-    left: 55px;
-    transform: rotate(30deg);
-}
-.katana::before { /* Punho */
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background-color: var(--black-lego);
-    border-radius: 2px;
-    top: -5px;
-    left: -2.5px;
+    height: 50px;
+    background: silver;
+    top: 30px;
+    right: -10px;
+    border: 1px solid #555;
 }
 
-.nunchaku {
-    width: 8px;
-    height: 30px;
-    background-color: #8D6E63; /* Madeira */
-    border-radius: 4px;
-    top: 55px;
-    left: 0px;
-    transform: rotate(-20deg);
+.nunchaku { background: #ffd700; height: 30px; }
+
+/* Animações */
+.attack-anim {
+    transform: translateX(100px) rotate(10deg);
 }
-.nunchaku::before { /* Segunda parte */
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 30px;
-    background-color: inherit;
-    border-radius: 4px;
-    top: 25px;
-    left: 15px; /* Conectado por uma "corrente" invisível */
-    transform: rotate(40deg);
+.red.attack-anim {
+    transform: translateX(-100px) rotate(-10deg);
 }
 
+.hit-anim {
+    animation: shake 0.3s;
+}
 
-/* Texto de ação */
+@keyframes shake {
+    0% { transform: translate(1px, 1px); }
+    50% { transform: translate(-3px, -1px); }
+    100% { transform: translate(0, 0); }
+}
+
 .action-text {
     position: absolute;
     top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.6);
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 1.1em;
-    color: var(--skin-color);
-    min-width: 250px;
-    border: 1px solid var(--grey-lego);
+    width: 100%;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 2px 2px black;
 }
 
 button {
-    margin-top: 20px;
     padding: 10px 20px;
-    background-color: var(--green-ninja);
+    font-size: 16px;
+    cursor: pointer;
+    background: #e74c3c;
     color: white;
     border: none;
-    border-radius: 8px;
-    font-size: 1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    border: 2px solid var(--green-ninja-dark);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-}
-
-button:hover {
-    background-color: var(--green-ninja-dark);
-    transform: translateY(-2px);
-}
-
-button:active {
-    transform: translateY(0);
-}
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px) rotate(-5deg); }
-  50% { transform: translateX(5px) rotate(5deg); }
-  100% { transform: translateX(0); }
-}
-
-.hit {
-  animation: shake 0.2s ease-in-out 2;
-}
-.ninja-figure.attack .katana {
-    transform: rotate(120deg); /* Swings the sword down */
-    transition: transform 0.2s;
-}
-
-.ninja-figure.attack .nunchaku {
-    transform: rotate(-60deg) scale(1.2);
-    transition: transform 0.2s;
+    border-radius: 5px;
 }
