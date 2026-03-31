@@ -29,3 +29,13 @@ document.addEventListener('keydown', (event) => {
     player.style.left = posX + 'px';
     player.style.top = posY + 'px';
 });
+// script.js
+const mundo = document.querySelector('.mundo');
+
+document.addEventListener('mousemove', (e) => {
+    // Rotate the world based on mouse position
+    let x = (window.innerWidth / 2 - e.pageX) / 10;
+    let y = (window.innerHeight / 2 - e.pageY) / 10;
+    
+    mundo.style.transform = `rotateX(${y}deg) rotateY(${-x}deg)`;
+});
