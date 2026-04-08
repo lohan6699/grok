@@ -50,3 +50,10 @@ cursor.execute("INSERT INTO usuarios (nome, email, senha) VALUES ('Admin', 'test
 conn.commit()
 conn.close()
 print("Banco de dados criado com sucesso!")
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
+import os
+
+app = Flask(__name__)
+app.secret_key = 'chave_secreta_super_segura_123' # Necess
