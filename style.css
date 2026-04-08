@@ -1,4 +1,4 @@
-/* Reset e Google Fonts */
+/* Importando uma fonte moderna */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
 * {
@@ -13,59 +13,57 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Fundo Preto Profundo */
+    background-color: #000000;
     overflow: hidden;
-    /* Fundo Preto Sólido com um leve toque de profundidade */
-    background: #000000;
     position: relative;
 }
 
-/* Adicionando um brilho ciano suave no fundo para não ficar chapado */
+/* Efeito de luz ciano no fundo para não ficar totalmente escuro */
 body::before {
     content: "";
     position: absolute;
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
     background: #00ffff;
     filter: blur(150px);
-    opacity: 0.15;
+    opacity: 0.1;
     border-radius: 50%;
-    z-index: 0;
 }
 
-/* Container de Login */
+/* Card de Login */
 .login-container {
-    position: relative;
-    z-index: 1;
-    background: rgba(10, 10, 10, 0.8); /* Preto quase opaco */
-    backdrop-filter: blur(10px);
+    background: rgba(15, 15, 15, 0.9); /* Preto fosco */
     border: 1px solid #00ffff; /* Borda Ciano */
     padding: 40px;
     border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); /* Brilho externo ciano */
     width: 100%;
-    max-width: 400px;
+    max-width: 380px;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
     text-align: center;
+    z-index: 1;
 }
 
 .login-form h2 {
-    color: #00ffff; /* Texto Ciano */
+    color: #00ffff; /* Título Ciano */
     font-size: 2rem;
-    margin-bottom: 10px;
+    font-weight: 600;
+    margin-bottom: 5px;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
 .login-form p {
     color: #ffffff;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin-bottom: 30px;
-    opacity: 0.6;
+    opacity: 0.7;
 }
 
-/* Campos de Input */
+/* Estilização dos Inputs */
 .input-group {
     position: relative;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .input-group i {
@@ -73,60 +71,70 @@ body::before {
     left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: #00ffff;
+    color: #00ffff; /* Ícones Ciano */
 }
 
 .input-group input {
     width: 100%;
     padding: 12px 15px 12px 45px;
-    background: #1a1a1a; /* Cinza bem escuro para o input */
+    background: #111; /* Fundo do input preto */
     border: 1px solid #333;
-    border-radius: 5px;
+    border-radius: 8px;
     outline: none;
-    color: #00ffff; /* Letra ciano ao digitar */
+    color: #fff;
     font-size: 1rem;
     transition: 0.3s;
 }
 
+/* Quando clica no input */
 .input-group input:focus {
     border-color: #00ffff;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
 }
 
-/* Botão Ciano Neon */
+/* Botão Ciano */
 .login-button {
     width: 100%;
     padding: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     background: #00ffff;
-    color: #000; /* Texto preto no botão ciano */
+    color: #000; /* Texto preto no fundo ciano */
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
     text-transform: uppercase;
+    transition: 0.3s;
+    margin-top: 10px;
 }
 
 .login-button:hover {
     background: #00cccc;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-    transform: scale(1.02);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
 }
 
-/* Links */
+/* Rodapé */
 .footer-links {
-    margin-top: 20px;
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     font-size: 0.8rem;
 }
 
 .footer-links a {
     color: #00ffff;
     text-decoration: none;
-    opacity: 0.8;
+    transition: 0.3s;
 }
 
 .footer-links a:hover {
-    opacity: 1;
-    text-decoration: underline;
+    color: #fff;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.footer-links span {
+    color: #fff;
+    opacity: 0.6;
 }
